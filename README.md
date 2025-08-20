@@ -1,4 +1,5 @@
 # Paralela
 
-Carlos Eduardo Rosendo Basseto
-10409941
+Nome - Carlos Eduardo Rosendo Basseto
+
+RA - 10409941
