@@ -3,23 +3,21 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
-// Define o número de processos filhos a serem criados
-#define NUM_PROCESSES 4
-// Define o tamanho total do vetor
-#define VECTOR_SIZE 1000
+
+#define NUM_PROCESSES 4 //número de processos
+#define VECTOR_SIZE 1000 // tamanho total do vetor
 
 int main() {
-    // Declaração do vetor e outras variáveis
+    // variáveis
     int vector[VECTOR_SIZE];
-    int pipes[NUM_PROCESSES][2]; // Array de pipes, um para cada processo filho
-    pid_t pids[NUM_PROCESSES];   // Array para armazenar os PIDs dos filhos
-    int total_sum = 0;           // Usando int para a soma total
+    int pipes[NUM_PROCESSES][2]; // Array de pipes
+    pid_t pids[NUM_PROCESSES];   // Array de PIDs
+    int total_sum = 0; 
 
-    // 1. Preenche o vetor com uma sequência de números (1, 2, 3, ..., 1000)
-    printf("Inicializando o vetor de %d posições com a sequência 1, 2, 3...\n", VECTOR_SIZE);
+    
     int verification_sum = 0;
     for (int i = 0; i < VECTOR_SIZE; i++) {
-        vector[i] = i + 1; // O vetor agora recebe a sequência i + 1
+        vector[i] = i + 1; 
         verification_sum += vector[i]; // Soma de verificação sequencial
     }
 
@@ -28,13 +26,12 @@ int main() {
 
     // Laço para criar os processos filhos
     for (int i = 0; i < NUM_PROCESSES; i++) {
-        // 3. Cria um pipe para o i-ésimo filho
         if (pipe(pipes[i]) == -1) {
             perror("pipe");
             exit(EXIT_FAILURE);
         }
 
-        // 2. Cria um processo filho usando fork
+        // Cria um processo filho usando fork
         pids[i] = fork();
 
         if (pids[i] < 0) {
@@ -42,9 +39,9 @@ int main() {
             exit(EXIT_FAILURE);
         }
 
-        // 5. Bloco de código para o processo filho
+        // código para o processo filho
         if (pids[i] == 0) {
-            // Fecha a ponta de leitura do seu próprio pipe, pois só vai escrever
+            // Fecha a ponta de leitura 
             close(pipes[i][0]);
 
             // Fecha os pipes herdados dos outros processos que não serão usados
@@ -58,14 +55,14 @@ int main() {
             // Calcula os índices de início e fim para o segmento deste filho
             int start_index = i * segment_size;
             int end_index = start_index + segment_size;
-            int local_sum = 0; // Usando int para a soma local
+            int local_sum = 0;
 
             // Calcula a soma parcial do seu segmento
             for (int k = start_index; k < end_index; k++) {
                 local_sum += vector[k];
             }
 
-            // Envia a soma parcial (int) para o processo pai através do pipe
+            // Envia a soma parcial
             if (write(pipes[i][1], &local_sum, sizeof(int)) == -1) {
                 perror("write");
                 exit(EXIT_FAILURE);
@@ -77,10 +74,9 @@ int main() {
             // Termina o processo filho com sucesso
             exit(EXIT_SUCCESS);
         }
-        // 6. Bloco de código para o processo pai (dentro do laço)
+        // Bloco de código para o processo pai 
         else {
-            // O pai fecha a ponta de escrita do pipe do filho recém-criado.
-            // Esta é a correção crucial.
+            // O pai fecha a ponta de escrita
             close(pipes[i][1]);
         }
     }
@@ -88,8 +84,7 @@ int main() {
     // Laço para ler as somas parciais de cada filho
     printf("Processo pai aguardando as somas parciais dos filhos...\n");
     for (int i = 0; i < NUM_PROCESSES; i++) {
-        int partial_sum; // Usando int para a soma parcial
-        // Lê a soma parcial do pipe do i-ésimo filho
+        int partial_sum; 
         if (read(pipes[i][0], &partial_sum, sizeof(int)) == -1) {
             perror("read");
             exit(EXIT_FAILURE);
@@ -110,17 +105,10 @@ int main() {
         waitpid(pids[i], NULL, 0);
     }
     
-    // 7. Imprime o resultado final
+    // Imprime o resultado final
     printf("\n--- Resultados ---\n");
     printf("Soma total calculada (paralela): %d\n", total_sum);
     printf("Soma de verificação (sequencial): %d\n", verification_sum);
-
-    // Verifica se os resultados são iguais
-    if (total_sum == verification_sum) {
-        printf("VERIFICAÇÃO: O resultado está correto!\n");
-    } else {
-        printf("VERIFICAÇÃO: O resultado está incorreto!\n");
-    }
 
     return 0;
 }
