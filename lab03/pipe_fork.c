@@ -77,12 +77,12 @@ int main() {
             // Termina o processo filho com sucesso
             exit(EXIT_SUCCESS);
         }
-    }
-
-    // 6. Bloco de código para o processo pai
-    // O pai fecha a ponta de escrita de cada pipe logo após o fork
-    for (int i = 0; i < NUM_PROCESSES; i++) {
-        close(pipes[i][1]);
+        // 6. Bloco de código para o processo pai (dentro do laço)
+        else {
+            // O pai fecha a ponta de escrita do pipe do filho recém-criado.
+            // Esta é a correção crucial.
+            close(pipes[i][1]);
+        }
     }
 
     // Laço para ler as somas parciais de cada filho
