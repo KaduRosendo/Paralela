@@ -12,7 +12,7 @@ int main() {
     int vector[VECTOR_SIZE];
     int pipes[NUM_PROCESSES][2]; // Array de pipes
     pid_t pids[NUM_PROCESSES];   // Array para armazenar os PIDs dos filhos
-    int soma_total = 0;
+    int total_sum = 0;
 
     // Preenche o vetor 
     int verification_sum = 0;
